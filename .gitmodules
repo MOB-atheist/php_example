@@ -1,0 +1,3 @@
+[submodule "AuthMeReloaded"]
+	path = AuthMeReloaded
+	url = git@github.com:AuthMe/AuthMeReloaded.git
