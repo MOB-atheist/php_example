@@ -45,8 +45,8 @@
             Registro Feito Com sucesso $Session->user
         </h3>");
     }
-
-    if(!$Session->VerificaSessao()){ 
+    echo('WTF'.($Session->ExisteSessao?'true':'false'));
+    if(!$Session->ExisteSessao){ 
         // Vai pegar a sessão do usuário e verificar se elá é
         // Se a sessão for válida significa que o usuário está logado
         // se ele estiver logado e a sessão for válida será retornado true
