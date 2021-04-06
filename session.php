@@ -87,7 +87,6 @@ class Session
             $stmt->bind_result($key);
             if ($stmt->fetch()) {
                 $this->ExisteSessao = true;
-                echo("THE KEY FOR LIFE IS $key");
                 return $key;
             }
         }
@@ -137,7 +136,6 @@ class Session
             $stmt->bind_result($key);
             if ($stmt->fetch()) {
                 $this->ExisteSessao = true;
-                echo("SERIOUSLY, THE KEY FOR LIFE IS $key");
                 return $key;
             }
         }
@@ -150,7 +148,7 @@ class Session
             $this->removeOldKeys($user);
             if($this->generateKey($user)){
                 $key = $this->GetKey($user);
-                echo("what the hell is going on $key  $user");
+                
                 $_SESSION['user'] = $user;
                 $_SESSION['key'] = $key;
                 return true;
