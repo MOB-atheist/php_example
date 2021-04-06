@@ -100,7 +100,15 @@
                 </tr>
             </table>
         </form>
-    <?php } ?>
+    <?php }else{
+
+        ?>
+            LOGADO<br>
+            <form method="post">
+                <input type="submit" name="action" value="Sair" />
+            </form>
+        <?php
+    } ?>
 </body>
 
 </html>

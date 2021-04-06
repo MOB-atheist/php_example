@@ -34,7 +34,11 @@ class Session
         $this->email = $Email;
         $this->ExisteSessao = false;
         if($this->VerificaSessao()){
-            return true;    
+            if(!$this->action === "Sair"){
+                return true;
+            }else{
+                $this->SairSessao();
+            }
         }
         if ($this->action && $User && $Pass) {
             if ($this->action === "Logar") {
@@ -91,6 +95,17 @@ class Session
             }
         }
         return false;
+    }
+
+    private function SairSessao(){
+        $mysqli = $this->getAuthmeMySqli();
+
+        $F_user = $this->getSession('user');
+        $this->removeOldKeys($F_user);
+        session_unset();
+        session_destroy();
+        
+        $this->ExisteSessao = false;
     }
 
     private function getUser ($username) {
