@@ -3,7 +3,6 @@
     session_start();
     error_reporting(E_ALL);
 
-    include "./password.php";
     // A linha abaixo é só pra não ficar repetindo a pasta toda hora,
     // não precisa utilizar no seu projeto se estiver na mesma pasta
     $PATH = "./AuthMe";
@@ -49,8 +48,6 @@ class Session
     
     function __construct(){
 
-        $this->password = $_ENV['password'];
-
         // CRIAÇÃO DA TABELA SESSÃO
         $SESSION = $this->getAuthmeMySqli();
         $SESSION->query(self::SESSION_TABLE);
@@ -91,7 +88,7 @@ class Session
 
     private function getAuthmeMySqli() {
         // CHANGE YOUR DATABASE DETAILS HERE BELOW: host, user, password, database name
-        $mysqli = new mysqli('localhost', 'root', $this->password, 'authme');
+        $mysqli = new mysqli('localhost', 'root', '', 'authme');
         if (mysqli_connect_error()) {
             printf('Could not connect to AuthMe database. Errno: %d, error: "%s"',
                 mysqli_connect_errno(), mysqli_connect_error());
