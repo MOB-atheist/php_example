@@ -65,7 +65,7 @@ class Session
 
         $this->ExisteSessao = false;
         if($this->VerificaSessao()){
-            if(!$this->action == "Sair"){
+            if($this->action !== "Sair"){
                 return true;
             }else{
                 $this->SairSessao();
