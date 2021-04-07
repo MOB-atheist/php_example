@@ -2,6 +2,8 @@
 
     session_start();
     error_reporting(E_ALL);
+
+    include "./password.php";
     // A linha abaixo é só pra não ficar repetindo a pasta toda hora,
     // não precisa utilizar no seu projeto se estiver na mesma pasta
     $PATH = "./AuthMe";
@@ -9,7 +11,6 @@
     // troque os caminhos abaixo de acordo com a pasta que estão salvos
     $auth = require("$PATH/AuthMeController.php");
     require "$PATH/Bcrypt.php";
-    include "./password.php";
 
     function get_from_post_or_empty($index_name)
     {
@@ -29,6 +30,18 @@ class Session
     const AUTHME_TABLE = 'authme';
     const SESSION_TIMER = '86400'; // segundos
 
+    const SESSION_TABLE = "
+        CREATE TABLE IF NOT EXISTS `session` (
+            `id` int NOT NULL AUTO_INCREMENT,
+            `userid` int NOT NULL,
+            `key` varchar(45) DEFAULT NULL,
+            `data` datetime DEFAULT CURRENT_TIMESTAMP,
+            `status` int DEFAULT '1',
+            PRIMARY KEY (`id`),
+            KEY `userid` (`userid`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    ";
+
     private $AuthMe;
     public $registrado = false;// Variavel que vai dizer se existe login
     public $logado = false;// Variavel que vai dizer se existe login
@@ -36,10 +49,14 @@ class Session
     
     function __construct(){
 
-        $this->AuthMe = new Bcrypt();
-
-        // Recebimento do formulário
         $this->password = $_ENV['password'];
+
+        // CRIAÇÃO DA TABELA SESSÃO
+        $SESSION = $this->getAuthmeMySqli();
+        $SESSION->query(self::SESSION_TABLE);
+
+        $this->AuthMe = new Bcrypt();
+        // Recebimento do formulário
 
         $this->action = get_from_post_or_empty("action");
         $this->user = get_from_post_or_empty("username");
@@ -98,7 +115,7 @@ class Session
         $F_user = $this->getSession('user');
 
         if ($mysqli !== null) {
-            $stmt = $mysqli->prepare('SELECT `key` FROM `session` WHERE `status` = 1 AND `key` = ? AND usuario = (SELECT id FROM authme WHERE username = ?) AND TIMESTAMPDIFF(SECOND, data, now()) < '. self::SESSION_TIMER);
+            $stmt = $mysqli->prepare('SELECT `key` FROM `session` WHERE `status` = 1 AND `key` = ? AND userid = (SELECT id FROM authme WHERE username = ?) AND TIMESTAMPDIFF(SECOND, data, now()) < '. self::SESSION_TIMER);
             $stmt->bind_param('ss', $F_key, $F_user);
             $stmt->execute();
             $stmt->bind_result($key);
@@ -137,7 +154,7 @@ class Session
     private function removeOldKeys($user){
         $mysqli = $this->getAuthmeMySqli();
         if ($mysqli !== null) {
-            $stmt = $mysqli->prepare('UPDATE `session` SET `status` = 0 WHERE `usuario` = (SELECT id FROM authme WHERE username = ?) AND `status` = 1;');
+            $stmt = $mysqli->prepare('UPDATE `session` SET `status` = 0 WHERE `userid` = (SELECT id FROM authme WHERE username = ?) AND `status` = 1;');
             $stmt->bind_param('s', $user);
             $stmt->execute();
         }
@@ -147,7 +164,7 @@ class Session
         $mysqli = $this->getAuthmeMySqli();
         if ($mysqli !== null) {
             $stmt = $mysqli->prepare('
-            INSERT INTO `session` (`usuario`, `key`) VALUES ((SELECT id FROM authme WHERE username = ?), MD5(CONCAT(?,DATE_FORMAT(NOW(),"%d%m%y%h%m%s"))))');
+            INSERT INTO `session` (`userid`, `key`) VALUES ((SELECT id FROM authme WHERE username = ?), MD5(CONCAT(?,DATE_FORMAT(NOW(),"%d%m%y%h%m%s"))))');
             $stmt->bind_param('ss', $usuario, $usuario);
             return $stmt->execute();
         }
@@ -158,7 +175,7 @@ class Session
         $mysqli = $this->getAuthmeMySqli();
 
         if ($mysqli !== null) {
-            $stmt = $mysqli->prepare('SELECT `key` FROM `session` WHERE `status` = 1 AND usuario = (SELECT id FROM authme WHERE username = ?) AND TIMESTAMPDIFF(SECOND, data, now()) < '. self::SESSION_TIMER);
+            $stmt = $mysqli->prepare('SELECT `key` FROM `session` WHERE `status` = 1 AND userid = (SELECT id FROM authme WHERE username = ?) AND TIMESTAMPDIFF(SECOND, data, now()) < '. self::SESSION_TIMER);
             $stmt->bind_param('s', $user);
             $stmt->execute();
             $stmt->bind_result($key);
